@@ -1,38 +1,18 @@
-import express from "express";
-import mongoose from "mongoose";
-import cors from "cors";
-import dotenv from "dotenv";
+const app = require("./app");
+const connectDB = require("./config/db");
+const { env } = require("./config/env");
 
-import authRoutes from "./routes/auth.js";
-import productRoutes from "./routes/products.js";
+const startServer = async () => {
+  try {
+    await connectDB();
 
-dotenv.config();
+    app.listen(env.port, () => {
+      console.log(`Server running on port ${env.port}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error.message);
+    process.exit(1);
+  }
+};
 
-const app = express();
-
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://YOUR-FRONTEND.vercel.app"
-  ],
-  credentials: true
-}));
-
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("ShopZen backend is live 🚀");
-});
-
-app.use("/auth", authRoutes);
-app.use("/products", productRoutes);
-
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected ✅"))
-  .catch((err) => console.log(err));
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} 🚀`);
-});
+startServer();
